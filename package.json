@@ -1,0 +1,16 @@
+{
+  "name": "livora-quotation-studio",
+  "version": "1.0.0",
+  "description": "Quotation automation for Livora Interior Studio (Node.js + MongoDB)",
+  "main": "server.js",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env --watch server.js",
+    "test": "node test/api.test.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
+}
