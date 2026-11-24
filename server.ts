@@ -1,3 +1,3 @@
-import { main } from './server.js';
+import serverModule from './server.js';
 
-main();
+export default serverModule.vercelHandler;

@@ -40,7 +40,7 @@ Open **http://localhost:3000**, log in with your `ADMIN_PASSWORD`.
 ## Put it online (optional)
 Run it on any Node host (a VPS, Render, Railway). Set the same three settings as environment variables, use HTTPS, and keep `ADMIN_PASSWORD` long. Without HTTPS the password travels unprotected.
 
-For Vercel, import this repository and set the project root to the repository root. Vercel detects `server.ts` as the Node.js server entry point. Keep the existing MongoDB and login environment variables configured in the Vercel project; do not commit `.env`.
+For Vercel, import this repository and set the project root to the repository root. `server.ts` exports the Vercel request handler. Keep the existing MongoDB and login environment variables configured in the Vercel project; do not commit `.env`.
 
 ## Check that it works
 ```

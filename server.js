@@ -34,6 +34,15 @@ function send(res, status, body, headers) {
 }
 function readJson(req) {
   return new Promise((resolve, reject) => {
+    let body;
+    try { body = req.body; }
+    catch (e) { return reject(new HttpError(400, 'Body is not valid JSON')); }
+    if (body !== undefined) {
+      if (body && typeof body === 'object' && !Buffer.isBuffer(body)) return resolve(body);
+      try { return resolve(JSON.parse(Buffer.isBuffer(body) ? body.toString('utf8') : String(body))); }
+      catch (e) { return reject(new HttpError(400, 'Body is not valid JSON')); }
+    }
+
     let size = 0; const chunks = [];
     req.on('data', (c) => {
       size += c.length;
@@ -272,5 +281,31 @@ async function main() {
   process.on('SIGINT', stop); process.on('SIGTERM', stop);
 }
 
-module.exports = { createApp, makeToken, monthKey, main };
+let vercelServerPromise;
+async function vercelHandler(req, res) {
+  try {
+    if (!ADMIN_PASSWORD || ADMIN_PASSWORD.startsWith('change-this')) throw new Error('ADMIN_PASSWORD is not configured');
+    if (!SESSION_SECRET || SESSION_SECRET.length < 16 || SESSION_SECRET.startsWith('change-this')) throw new Error('SESSION_SECRET is not configured');
+    if (!vercelServerPromise) {
+      const { MongoClient, ObjectId } = require('mongodb');
+      const client = new MongoClient(MONGODB_URI, { serverSelectionTimeoutMS: 8000 });
+      vercelServerPromise = (async () => {
+        await client.connect();
+        await client.db(DB_NAME).command({ ping: 1 });
+        return createApp(client.db(DB_NAME), ObjectId);
+      })().catch((e) => {
+        vercelServerPromise = null;
+        throw e;
+      });
+    }
+    const server = await vercelServerPromise;
+    server.emit('request', req, res);
+  } catch (e) {
+    console.error('Vercel app initialization failed:', e);
+    if (!res.headersSent) send(res, 500, { error: 'Server initialization failed.' });
+    else res.end();
+  }
+}
+
+module.exports = { createApp, makeToken, monthKey, main, vercelHandler };
 if (require.main === module) main();

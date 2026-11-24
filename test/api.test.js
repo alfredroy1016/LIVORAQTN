@@ -2,6 +2,7 @@
 process.env.ADMIN_PASSWORD = 'test-password-123';
 process.env.SESSION_SECRET = 'a-long-test-secret-value-1234567890';
 const assert = require('node:assert/strict');
+const { Readable } = require('node:stream');
 const { Db, ObjectId } = require('./fake-mongo');
 const { createApp } = require('../server');
 
@@ -39,6 +40,23 @@ async function t(name, fn) {
   await t('right password gives a token', async () => {
     const r = await call('POST', '/api/login', { password: 'test-password-123' }, ''); assert.equal(r.status, 200);
     token = r.json.token; assert.ok(token.includes('.'));
+  });
+  await t('pre-parsed JSON request bodies are accepted', async () => {
+    const req = Readable.from([]);
+    Object.assign(req, {
+      method: 'POST', url: '/api/login', headers: {}, socket: { remoteAddress: '127.0.0.2' },
+      body: { password: 'test-password-123' }
+    });
+    const result = await new Promise((resolve) => {
+      const res = {
+        headersSent: false,
+        writeHead(status, headers) { this.statusCode = status; this.headers = headers; },
+        end(body) { this.headersSent = true; resolve({ status: this.statusCode, body }); }
+      };
+      server.emit('request', req, res);
+    });
+    assert.equal(result.status, 200);
+    assert.ok(JSON.parse(result.body).token);
   });
   await t('tampered token is refused', async () => {
     const bad = token.slice(0, -3) + (token.endsWith('aaa') ? 'bbb' : 'aaa');
