@@ -307,5 +307,16 @@ async function vercelHandler(req, res) {
   }
 }
 
-module.exports = { createApp, makeToken, monthKey, main, vercelHandler };
-if (require.main === module) main();
+
+// Export the handler function for Vercel
+module.exports = vercelHandler;
+
+// Keep helper functions available
+module.exports.createApp = createApp;
+module.exports.makeToken = makeToken;
+module.exports.monthKey = monthKey;
+
+// Start normally when running locally
+if (require.main === module) {
+  main();
+}
