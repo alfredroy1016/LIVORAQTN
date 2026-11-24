@@ -272,5 +272,5 @@ async function main() {
   process.on('SIGINT', stop); process.on('SIGTERM', stop);
 }
 
-module.exports = { createApp, makeToken, monthKey };
+module.exports = { createApp, makeToken, monthKey, main };
 if (require.main === module) main();
