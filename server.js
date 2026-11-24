@@ -301,7 +301,9 @@ async function vercelHandler(req, res) {
     const server = await vercelServerPromise;
     server.emit('request', req, res);
   } catch (e) {
-    console.error('Vercel app initialization failed:', e);
+   console.error('VERCEL_INITIALIZATION_ERROR:', e);
+console.error('ERROR MESSAGE:', e.message);
+console.error('ERROR STACK:', e.stack);
     if (!res.headersSent) send(res, 500, { error: 'Server initialization failed.' });
     else res.end();
   }
