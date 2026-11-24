@@ -52,4 +52,4 @@ Runs 26 checks of the server (login, numbering, saving, deleting). It uses a bui
 - `server.js` – the whole server (login, API, MongoDB, serves the page)
 - `public/index.html` – the quotation screen and A4 layout
 - `test/` – automatic checks
-# LIVORA-QTN
+# LIVORAQTN
